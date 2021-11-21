@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      body {
+        font-family: "Noto Sans JP", sans-serif;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script>
+      MathJax = { chtml: { displayAlign: "left", displayIndent: "2em" } };
+    </script>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+    ></script>
+    <title>教育システムデザイン最終課題</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/intro.js/minified/introjs.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+
+  <body>
+    
+    <h1>電場・磁場を操ってみよう</h1>
+    <input
+      type="button"
+      class="btn btn-primary"
+      value="チュートリアル"
+      onclick="introJs().start();"
+    />
+    <div id="info" data-step="5" data-intro="経過時間です．">Time: 0.00 s</div>
+
+    <table
+      class="table table-striped"
+      data-step="6"
+      data-intro="初期状態を指定できます．"
+    >
+      <tr>
+        <td style="width: 80px">荷電粒子</td>
+        <td>質量\((kg)\)</td>
+        <td>
+          <input
+            type="range"
+            id="mass"
+            oninput="init()"
+            min="1"
+            max="20"
+            step="0.1"
+          />
+        </td>
+        <td id="mass_value"></td>
+        <td>電荷\((C)\)</td>
+        <td>
+          <input
+            type="range"
+            id="charge"
+            oninput="init()"
+            value="5"
+            min="-20"
+            max="20"
+          />
+        </td>
+        <td id="charge_value"></td>
+      </tr>
+      <tr>
+        <td>初速</td>
+        <td>\(v_x(m/s)\)</td>
+        <td><input type="range" id="init_vx" oninput="init()" /></td>
+        <td id="vx0_value"></td>
+        <td>\(v_y(m/s)\)</td>
+        <td><input type="range" id="init_vy" oninput="init()" /></td>
+        <td id="vy0_value"></td>
+      </tr>
+      <tr>
+        <td>場</td>
+        <td>電場</td>
+        <td>
+          <input
+            type="range"
+            id="elec_field"
+            value="0"
+            min="-20"
+            max="20"
+            oninput="init()"
+          />
+        </td>
+        <td id="ef_value"></td>
+        <td>磁場</td>
+        <td>
+          <input
+            type="range"
+            id="mag_field"
+            value="-1"
+            min="-20"
+            max="0"
+            oninput="init()"
+          />
+        </td>
+        <td id="mf_value"></td>
+      </tr>
+    </table>
+    
+    <canvas
+      id="myCanvas"
+      width="600"
+      height="400"
+      data-step="4"
+      data-intro="シミュレーションの様子が描画されます．荷電粒子の初期座標はクリックでも動かせます．磁場は画面奥から手前側に流れています．"
+    ></canvas
+    >
+    <canvas
+      id="arrow"
+      width="120"
+      height="120"
+      data-step="7"
+      data-intro="電場の方向を指定できます．矢印はドラッグで回転します．"
+    ></canvas>
+    <br />
+    <input
+      type="button"
+      id="btnAnime"
+      class="btn btn-primary"
+      value="アニメーション開始"
+      onclick="startAnime()"
+      data-step="1"
+      data-intro="ここを押すとシミュレーションが始まります．"
+    />
+    <input
+      type="button"
+      id="btnStep"
+      class="btn btn-success"
+      value="1ステップ進む"
+      onclick="stepOnce()"
+      data-step="2"
+      data-intro="時間刻み幅(0.05秒)ごとに状態を進めます．"
+    />
+    <input
+      type="button"
+      id="btnReset"
+      class="btn btn-danger"
+      value="リセット"
+      onclick="init()"
+      data-step="3"
+      data-intro="初期状態にリセットします．"
+    />
+    <table
+      class="table table-striped mx-auto"
+      style="max-width: 400px; table-layout: fixed; text-align: right"
+      data-step="8"
+      data-intro="座標と速度がリアルタイムで反映されます．"
+    >
+      <thead>
+        <tr>
+          <th scope="col">\(x\)</th>
+          <th scope="col">\(y\)</th>
+          <th scope="col">\(v_x\)</th>
+          <th scope="col">\(v_y\)</th>
+          <th scope="col">\(\theta _E\)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="text-x"></td>
+          <td id="text-y"></td>
+          <td id="text-vx"></td>
+          <td id="text-vy"></td>
+          <td id="theta_value"></td>
+        </tr>
+      </tbody>
+    </table>
+    <br><br><br><br>
+    <div
+      class="chart"
+      data-step="9"
+      data-intro="粒子の速度をリアルタイム描画します．"
+    >
+      <canvas id="myChart"></canvas>
+    </div>
+    <div
+      id="quiz"
+      data-step="10"
+      data-intro="余力のある人は，小クイズに挑戦してみてください．"
+    >
+      <div style="padding: 20px">
+        <h6>
+          シミュレーションの結果から，電場・磁場中の荷電粒子における運動方程式を考えてみましょう．
+        </h6>
+      </div>
+      <div id="choices">
+        <ul class="choice">
+          <li>
+            <label>
+              <input
+                class="form-check-input"
+                type="radio"
+                name="sentakushi"
+                value="1"
+                v-model="choice"
+              />
+              \(1. q(E+vB)\)
+            </label>
+          </li>
+
+          <li>
+            <label>
+              <input
+                class="form-check-input"
+                type="radio"
+                name="sentakushi"
+                value="2"
+                v-model="choice"
+              />
+              \(2. q(EvB)\)
+            </label>
+          </li>
+
+          <li>
+            <label>
+              <input
+                class="form-check-input"
+                type="radio"
+                name="sentakushi"
+                value="3"
+                v-model="choice"
+              />
+              \(3. \displaystyle\frac{E+vB}{q}\)
+            </label>
+          </li>
+
+          <li>
+            <label>
+              <input
+                class="form-check-input"
+                type="radio"
+                name="sentakushi"
+                value="4"
+                v-model="choice"
+              />
+              \(4. E+q(vB)\)
+            </label>
+          </li>
+          <li>
+            <button class="btn btn-primary" @click="toggle()">回答</button>
+          </li>
+        </ul>
+      </div>
+      <accordion :choice="choice" ref="accordion">
+        <div class="details" slot="OK">
+          <h3>正解です</h3>
+          <p>よくできました！</p>
+        </div>
+        <div class="details" slot="NG">
+          <h3>不正解です</h3>
+          <p>もう一度考えましょう．</p>
+        </div>
+      </accordion>
+  </div>
+
+    <footer>Takuma Kobayashi All rights reserved.</footer>
+
+    <script src="./main.js"></script>
+    <script src="./quiz.js"></script>
+  </body>
+</html>

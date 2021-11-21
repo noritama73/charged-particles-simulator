@@ -1,0 +1,51 @@
+.accordion {
+  color: #1a1c1d;
+  border-left: 10px solid rgba(0, 0, 0, 0.12);
+}
+.accordion-body {
+  overflow: hidden;
+  transition: 0.3s ease-in-out;
+}
+.details {
+  padding: 10px;
+}
+ul li {
+  list-style: none;
+  margin-top: 10px;
+}
+
+ul li label {
+  margin-left: 10px;
+}
+
+.choices {
+  text-align: center;
+}
+
+.choice {
+  text-align: left;
+  display: inline-block;
+}
+
+li {
+  margin: 20px;
+}
+
+header, footer{
+	text-align: center;
+	background-color: rgb(220, 220, 220);
+	padding: 10px;
+}
+
+h1{
+	text-align: center;
+}
+
+body {
+  width: 100%;
+  text-align:center;
+}
+
+.chart {
+  text-align: center;
+}
