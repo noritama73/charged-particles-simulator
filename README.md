@@ -12,7 +12,7 @@
 
 　[Github pages][page]にてアクセスできます．画面上部の「チュートリアル」ボタンを押すと，アプリ使用におけるチュートリアルを確認できます．詳しい説明はそちらをご覧ください．
 
-[page]:https://noritama73.github.io/for-optim/index.html
+[page]:https://noritama73.github.io/charged-particles-simulator/index.html
 
 ## 使用言語・ライブラリ
 
